@@ -1,3 +1,7 @@
+.ipynb*
+data/italian
+.idea/
+.DS_Store
 share/
 etc/
 lib/
