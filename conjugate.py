@@ -113,24 +113,22 @@ def one_conjugation(body, pos, verb, mobile_title, prompt, mode):
 ####################
 
 forms = [
-    ["Indicativo Presente",             '(adesso)',             'all'],
-    ["Indicativo Imperfetto",           '(ieri)',               'random'],
-    ["Indicativo Passato remoto",       '(molto tempo fa)',     'firstplus'],
+#    ["Indicativo Presente",             '(adesso)',             'all'],
+#    ["Indicativo Imperfetto",           '(ieri)',               'firstplus'],
+    ["Indicativo Passato remoto",       '(molto tempo fa)',     'random'],
     ["Indicativo Futuro semplice",      '(domani)',             'random'],
-    ["Indicativo Passato prossimo",     '(perfetto)',           'random'],
-    ["Indicativo Trapassato prossimo",  '(perchè ieri)',        'random'],
-    ["Congiuntivo Presente",            '',                     'firstplus'],
-    ["Congiuntivo Passato",             '(perfetto)',           'firstplus'],
-    ["Condizionale Presente",           'se (presente)',        'firstplus'],
-    ["Condizionale Passato",            'se (passato)',         'random'],
-    ["Gerundio Presente",               '(...ndo)',             'random'],
-    ["Gerundio Passato",                '(passato ...ndo)',     'random'],
-    ["Participio Presente",             '(aggetivo)',           'random'],
-    ["Imperativo Presente",             '(per favore)',         'first']
-     # ["Participio Passato"
-     # ["Congiuntivo Trapassato",          '???",               'random'],
-     # ["Congiuntivo Imperfetto",          '???",               'random'],
-     # ["Indicativo Futuro anteriore"",    '???",               'random'],
+#    ["Indicativo Passato prossimo",     '(perfetto)',           'random'],
+#    ["Indicativo Trapassato prossimo",  '(perchè ieri)',        'random'],
+    ["Congiuntivo Presente",            '(presente)',           'random'],
+    ["Congiuntivo Imperfetto",          '(ieri)',               'random'],
+#    ["Congiuntivo Passato",             '(perfetto)',           'firstplus'],
+    ["Condizionale Presente",           'se (presente)',        'rendom'],
+   # ["Gerundio Presente",               '(...ndo)',             'random'],
+   # ["Gerundio Passato",                '(passato ...ndo)',     'random'],
+   # ["Participio Presente",             '(aggetivo)',           'random'],
+   # ["Imperativo Presente",             '(per favore)',         'first'],
+   # ["Indicativo Futuro anteriore"",    '???",               'random'],
+   # ["Congiuntivo Trapassato",          '???",               'random'],
      ]
 
 def one_verb(pos, verb):
@@ -169,9 +167,10 @@ def one_verb2(pos, verb):
 
 def main():
     rows = [['Position', 'Mood:Tense', 'Subject', 'Infinitive', 'Front', 'Back']]
-    with open('verbs.dat') as f:
+    with open('top37.dat') as f:
         for pos, verb in enumerate(f.readlines()):
             rows += one_verb(pos, verb.strip())
+    random.shuffle(rows)
     write_full_csv(rows)
     write_mini_csv(rows)
 
