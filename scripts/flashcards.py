@@ -11,7 +11,7 @@ from bs4 import BeautifulSoup
 ####################
 
 ITALIAN_VERB = "https://conjugator.reverso.net/conjugation-italian-verb-%s.html"
-IDATA = 'data/italian'
+HTMLDATA = 'data/html'
 CSVDATA = 'data/csvs'
 
 blocks = {
@@ -31,15 +31,15 @@ blocks = {
 
 # create database if need be
 try:
-    os.makedirs(IDATA)
+    os.makedirs(HTMLDATA)
     os.makedirs(CSVDATA)
 except FileExistsError:
     pass
 
 
 # write out the csvs, take care about quoting and encoding
-def write_full_csv(rows):
-    with open('%s/full-verbs.csv' % (CSVDATA), encoding='utf-8', mode='w') as f:
+def write_full_csv(output, rows):
+    with open(output, encoding='utf-8', mode='w') as f:
         w = csv.writer(f, delimiter=',', quotechar='"', quoting=csv.QUOTE_ALL)
         for row in rows:
             w.writerow(row)
@@ -58,7 +58,7 @@ def request_contents(url):
 
 def download_verb_data(verb):
     url = ITALIAN_VERB % verb
-    datapath = '%s/%s.html' % (IDATA, verb)
+    datapath = '%s/%s.html' % (HTMLDATA, verb)
 
     try:
         with (open(datapath, 'r')) as f:
@@ -105,7 +105,7 @@ def one_block(body, verb, mobile_title):
             ]
         return ({mobile_title : forms})
 
-def one_verb(verb):
+def one_verb(pos, verb):
     sys.stderr.write('[%s]\n' % (verb))
     body = download_verb_data(verb)
     if not body:
@@ -122,19 +122,19 @@ def one_verb(verb):
         for i in range(8):
             front = '%s -> %s' % (present[i], blocks[block])
             back = forms[block][i]
-            cards += [[verb, re.sub('Indicativo ', '', block), front, back]]
+            cards += [[pos, verb, re.sub('Indicativo ', '', block), front, back]]
     return (cards)
 
 
 
 
-def main():
-    cards = [['Verb', 'Form', 'Front', 'Back']]
-    with open('top37.dat') as f:
+def main(path, output):
+    cards = [['Position', 'Verb', 'Form', 'Front', 'Back']]
+    with open(path) as f:
         for pos, verb in enumerate(f.readlines()):
-            cards += one_verb(verb.strip())
+            cards += one_verb(pos, verb.strip())
 
-    write_full_csv(cards)
+    write_full_csv(output, cards)
 
 if __name__ == '__main__':
-    main()
+    main(sys.argv[1], sys.argv[2])
