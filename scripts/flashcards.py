@@ -22,7 +22,7 @@ blocks = {
     "Indicativo Trapassato prossimo" : "Trapassato Prossimo",
     "Indicativo Futuro anteriore" : "Futuro Anteriore",
     "Congiuntivo Presente" : "(che) Presente",
-    "Congiuntivo Passato" : "(che) Perfettoal",
+    "Congiuntivo Passato" : "(che) Perfetto",
     "Congiuntivo Trapassato" : "(che) Trapassato",
     "Congiuntivo Imperfetto" : "(che) Imperfetto",
     "Condizionale Presente" : "(se) Presente",
@@ -119,13 +119,12 @@ def one_verb(pos, verb):
 
     cards = []
     for block in blocks.keys():
-        for i in range(8):
-            front = '%s -> %s' % (present[i], blocks[block])
-            back = forms[block][i]
-            cards += [[pos, verb, re.sub('Indicativo ', '', block), front, back]]
+        # pick one random form
+        i = random.choice(range(8))
+        front = '%s -> %s' % (present[i], blocks[block])
+        back = forms[block][i]
+        cards += [[pos, verb, re.sub('Indicativo ', '', block), front, back]]
     return (cards)
-
-
 
 
 def main(path, output):
