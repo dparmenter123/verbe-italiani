@@ -86,8 +86,8 @@ Here are all the forms, note the spellings
     # gshuf is a super useful utility that randomizes the input records. Anki does not do that, stupidly.
     
     # to study a random set of the top 233 perfect (PP) forms
-    $ cat top233.csv | egrep 'random' | egrep 'Passato prossimo' | cut -d ',' -f 5 -f 6 | gshuf > top233-perfetto.csv
+    $ cat top236.csv | egrep 'random' | egrep 'Passato prossimo' | cut -d ',' -f 5 -f 6 | gshuf > top236-perfetto.csv
     
     # to study both forms of the subjunctive
-    $ cat top233.csv | egrep 'random' | egrep 'Congiuntivo (Presente|Imperfetto)' | cut -d ',' -f 5 -f 6 | gshuf > top233-congiuntivo.csv
+    $ cat top236.csv | egrep 'random' | egrep 'Congiuntivo (Presente|Imperfetto)' | cut -d ',' -f 5 -f 6 | gshuf > top236-congiuntivo.csv
 ~~~

@@ -157,7 +157,11 @@ def main(path, output):
     cards = [['Position', 'POS', 'Verb', 'Form', 'Front', 'Back']]
     with open(path) as f:
         for pos, verb in enumerate(f.readlines()):
-            cards += one_verb(pos, verb.strip())
+            if (verb[0] == '#'):
+                # strip out comments
+                pass
+            else:
+                cards += one_verb(pos, verb.strip())
 
     write_full_csv(output, cards)
 
