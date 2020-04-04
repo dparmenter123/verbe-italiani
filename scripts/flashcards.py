@@ -92,7 +92,17 @@ def one_block(body, verb, mobile_title):
     tense = ' '.join(mood_tense[1:])
     for block in body.find_all('div', attrs={"mobile-title": mobile_title}):
         forms = [li.text for li in block.find_all('li')]
-        if len(forms) == 6:
+        # there are three separate patterns to account fo:
+        # 1) gender neutral 3rd person, len(forms) == 6
+        # 2) gender specific 3rd person, len(forms) == 8
+        # 3) composto forms feature avere AND  essere forms, len(forms) == 13
+        #    for some reason, reverso treats the 3rd person singular as gender neutral, why?
+        if len(forms) == 8:
+            # case 2)
+            # all is well, do nothing
+            pass
+        elif len(forms) == 6:
+            # case 1)
             forms = [
                 forms[0],
                 forms[1],
@@ -102,6 +112,18 @@ def one_block(body, verb, mobile_title):
                 forms[4],
                 re.sub('loro', 'loro(m)', forms[5]),
                 re.sub('loro', 'loro(f)', forms[5]),
+            ]
+        elif len(forms) == 13:
+            # case 2)
+            forms = [
+                '%s / %s' % (forms[0],                            forms[6]),
+                '%s / %s' % (forms[1],                            forms[7]),
+                '%s / %s' % (re.sub('lei/lui', 'lui', forms[2]),  forms[8]),
+                '%s / %s' % (re.sub('lei/lui', 'lei', forms[2]),  forms[8]),
+                '%s / %s' % (forms[3],                            forms[9]),
+                '%s / %s' % (forms[4],                            forms[10]),
+                '%s / %s' % (re.sub('loro', 'loro(m)', forms[5]), forms[11]),
+                '%s / %s' % (re.sub('loro', 'loro(f)', forms[5]), forms[12]),
             ]
         return ({mobile_title : forms})
 
@@ -119,16 +141,20 @@ def one_verb(pos, verb):
 
     cards = []
     for block in blocks.keys():
-        # pick one random form
-        i = random.choice(range(8))
-        front = '%s -> %s' % (present[i], blocks[block])
-        back = forms[block][i]
-        cards += [[pos, verb, re.sub('Indicativo ', '', block), front, back]]
+        # print out all the forms
+        # and one random one
+        pick = random.choice(range(8))
+        for i in range(8):
+            front = '%s -> %s' % (present[i], blocks[block])
+            back = forms[block][i]
+            cards += [[pos, i, verb, re.sub('Indicativo ', '', block), front, back]]
+            if i == pick:
+                cards += [[pos, 'random', verb, re.sub('Indicativo ', '', block), front, back]]
     return (cards)
 
 
 def main(path, output):
-    cards = [['Position', 'Verb', 'Form', 'Front', 'Back']]
+    cards = [['Position', 'POS', 'Verb', 'Form', 'Front', 'Back']]
     with open(path) as f:
         for pos, verb in enumerate(f.readlines()):
             cards += one_verb(pos, verb.strip())
