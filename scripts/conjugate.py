@@ -15,18 +15,19 @@ HTMLDATA = 'data/html'
 CSVDATA = 'data/csvs'
 
 blocks = {
+    "Indicativo Presente": "Presente",
     "Indicativo Imperfetto" : "Imperfetto",
     "Indicativo Passato remoto" : "Passato Remoto",
     "Indicativo Futuro semplice" : "Futuro",
     "Indicativo Passato prossimo" : "Perfetto",
     "Indicativo Trapassato prossimo" : "Trapassato Prossimo",
     "Indicativo Futuro anteriore" : "Futuro Anteriore",
-    "Congiuntivo Presente" : "(che) Presente",
-    "Congiuntivo Passato" : "(che) Perfetto",
-    "Congiuntivo Trapassato" : "(che) Trapassato",
-    "Congiuntivo Imperfetto" : "(che) Imperfetto",
-    "Condizionale Presente" : "(se) Presente",
-    "Condizionale Passato" : "(se) Passato",
+    "Congiuntivo Presente" : "Congiuntivo Presente",
+    "Congiuntivo Passato" : "Congiuntivo Perfetto",
+    "Congiuntivo Trapassato" : "Congiuntivo Trapassato",
+    "Congiuntivo Imperfetto" : "Congiuntivo Imperfetto",
+    "Condizionale Presente" : "Condizionale Presente",
+    "Condizionale Passato" : "Condizionale Passato",
 }
 
 # create database if need be
@@ -142,14 +143,10 @@ def one_verb(pos, verb):
     cards = []
     for block in blocks.keys():
         # print out all the forms
-        # and one random one
-        pick = random.choice(range(8))
         for i in range(8):
             front = '%s -> %s' % (present[i], blocks[block])
             back = forms[block][i]
-            cards += [[pos, i, verb, re.sub('Indicativo ', '', block), front, back]]
-            if i == pick:
-                cards += [[pos, 'random', verb, re.sub('Indicativo ', '', block), front, back]]
+            cards += [[pos, i, verb, blocks[block], front, back]]
     return (cards)
 
 
