@@ -66,3 +66,11 @@ DROP TABLE IF EXISTS temp1;
 .output appdb.csv
 select * from appdb ORDER BY freq DESC;;
 .output stdout
+
+DROP TABLE IF EXISTS cards;
+CREATE TABLE cards (
+  verb TEXT,
+  pos INTEGER,
+  form TEXT,
+  conjugation TEXT
+  )
