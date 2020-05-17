@@ -42,8 +42,10 @@ CREATE TABLE IF NOT EXISTS reflexive (
 #.mode csv
 #.output appdb.csv
 
-DROP TABLE IF EXISTS appdb;
+DROP TABLE IF EXISTS temp1;
+create table temp1 AS select verb FROM (select verb from master where verb NOT IN ( select verb from irregular )) ;
 
+DROP TABLE IF EXISTS appdb;
 CREATE TABLE appdb AS
 select *
 FROM (
@@ -52,7 +54,7 @@ FROM (
 UNION
 select *
 FROM (
-    select master.verb, freq.freq AS freq, 0 AS irregular, 0 AS reflexive from master INNER JOIN freq WHERE master.verb = freq.verb ORDER BY freq.freq
+    select temp1.verb, freq.freq AS freq, 0 AS irregular, 0 AS reflexive from temp1 INNER JOIN freq WHERE temp1.verb = freq.verb ORDER BY freq.freq
   )
 UNION
 select *
@@ -60,5 +62,7 @@ select *
     select reflexive.reflexive, freq.freq AS freq, 0 AS irregular, 1 AS reflexive from reflexive INNER JOIN freq WHERE reflexive.verb = freq.verb 
   )
 ORDER by freq DESC LIMIT 100;
+
+select * from appdb ORDER BY freq DESC LIMIT 25;
 
 #.output stdout
