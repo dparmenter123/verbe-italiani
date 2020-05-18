@@ -52,7 +52,7 @@ def read_appdb():
     conn = sqlite3.connect(DBPATH)
     c = conn.cursor()
 
-    results = [row[0] for row in c.execute('SELECT verb FROM appdb ORDER BY freq DESC LIMIT 1')]
+    results = [row[0] for row in c.execute('SELECT verb FROM appdb ORDER BY freq DESC LIMIT 5')]
     return(results)
 
 def write_appdb(conjugations):
@@ -104,11 +104,14 @@ def download_verb_data(verb):
         return (None)
     return (body)
 
+def form_level(mobile_title):
+    return('_'.join(mobile_title.split()).upper())
+
 def one_block(body, verb, mobile_title):
     cards = []
 
     for block in body.find_all('div', attrs={"mobile-title": mobile_title}):
-        short_form = '_'.join([x[:2]  for x in mobile_title.split()]).upper()
+        short_form = form_level(mobile_title)
         forms = [li.text for li in block.find_all('li')]
         # there are three separate patterns to account fo:
         # 1) gender neutral 3rd person, len(forms) == 6
@@ -159,7 +162,7 @@ def one_verb(verb):
     return (cards)
 
 def main():
-    cards = [['POS', 'Infinitive', 'Form', 'Conjugation']]
+    cards = []
     verbs = read_appdb()
     for verb in verbs:
         cards += one_verb(verb)

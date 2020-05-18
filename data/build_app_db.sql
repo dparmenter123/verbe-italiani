@@ -1,3 +1,29 @@
+DROP TABLE IF EXISTS forms;
+
+CREATE TABLE IF NOT EXISTS forms (
+  form TEXT PRIMARY KEY,
+  level TEXT
+  );
+
+INSERT into forms values ('INDICATIVO_PRESENTE', 'A0');
+INSERT into forms values ('INDICATIVO_PASSATO_PROSSIMO', 'A1');
+
+INSERT into forms values ('INDICATIVO_FUTURO_SEMPLICE', 'A2');
+INSERT into forms values ('INDICATIVO_IMPERFETTO', 'A2');
+INSERT into forms values ('CONDIZIONALE_PRESENTE', 'A2');
+INSERT into forms values ('CONGIUNTIVO_PRESENTE', 'A2');
+
+INSERT into forms values ('INDICATIVO_TRAPASSATO_PROSSIMO', 'B1');
+INSERT into forms values ('CONGIUNTIVO_IMPERFETTO', 'B1');
+INSERT into forms values ('CONGIUNTIVO_PASSATO', 'B1');
+INSERT into forms values ('CONGIUNTIVO_TRAPASSATO', 'B1');
+INSERT into forms values ('CONDIZIONALE_PASSATO', 'B1');
+
+INSERT into forms values ('INDICATIVO_PASSATO_REMOTO', 'B2');
+INSERT into forms values ('INDICATIVO_TRAPASSATO_REMOTO', 'B2');
+INSERT into forms values ('INDICATIVO_FUTURO_ANTERIORE', 'B2');
+
+
 DROP TABLE IF EXISTS freq;
 CREATE TABLE IF NOT EXISTS freq (
   freq INTEGER,
@@ -74,3 +100,4 @@ CREATE TABLE cards (
   form TEXT,
   conjugation TEXT
   )
+
