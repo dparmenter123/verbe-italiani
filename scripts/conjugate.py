@@ -15,7 +15,7 @@ HTMLDATA = 'data/html'
 CSVDATA = 'data/csvs'
 
 blocks = {
-    "Indicativo Presente": "Presente",
+    "Indicativo Presente": "Indicativo Presente",
     "Indicativo Imperfetto" : "Imperfetto",
     "Indicativo Passato remoto" : "Passato Remoto",
     "Indicativo Futuro semplice" : "Futuro",
@@ -29,6 +29,15 @@ blocks = {
     "Condizionale Presente" : "Condizionale Presente",
     "Condizionale Passato" : "Condizionale Passato",
 }
+
+composto = [
+    "Indicativo Passato prossimo",
+    "Indicativo Trapassato prossimo",
+    "Indicativo Futuro anteriore",
+    "Congiuntivo Passato",
+    "Congiuntivo Trapassato",
+    "Condizionale Passato"
+]
 
 # create database if need be
 try:
@@ -142,16 +151,19 @@ def one_verb(pos, verb):
 
     cards = []
     for block in blocks.keys():
+        composto_o_non = 'scomposto'
+        if block in composto:
+            composto_o_non = 'composto'
         # print out all the forms
         for i in range(8):
             front = '%s -> %s' % (present[i], blocks[block])
             back = forms[block][i]
-            cards += [[pos, i, verb, blocks[block], front, back]]
+            cards += [[pos, 'pos%d' % i, verb, blocks[block], composto_o_non, front, back]]
     return (cards)
 
 
 def main(path, output):
-    cards = [['Position', 'POS', 'Verb', 'Form', 'Front', 'Back']]
+    cards = [['Position', 'POS', 'Verb', 'Form', 'Composto', 'Front', 'Back']]
     with open(path) as f:
         for pos, verb in enumerate(f.readlines()):
             if (verb[0] == '#'):

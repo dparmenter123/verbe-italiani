@@ -52,7 +52,7 @@ def read_appdb():
     conn = sqlite3.connect(DBPATH)
     c = conn.cursor()
 
-    results = [row[0] for row in c.execute('SELECT verb FROM appdb ORDER BY freq DESC LIMIT 5')]
+    results = [row[0] for row in c.execute('SELECT verb FROM appdb ORDER BY freq DESC LIMIT 100')]
     return(results)
 
 def write_appdb(conjugations):
