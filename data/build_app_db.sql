@@ -99,5 +99,14 @@ CREATE TABLE cards (
   pos INTEGER,
   form TEXT,
   conjugation TEXT
-  )
+  );
 
+DROP TABLE IF EXISTS carddeck;
+CREATE TABLE carddeck (
+  card INTEGER PRIMARY KEY,
+  level TEXT,
+  repetitions INTEGER,
+  easiness REAL,
+  interval INTEGER,
+  nextdate INTEGER
+  );
