@@ -2,6 +2,7 @@ DROP TABLE IF EXISTS forms;
 
 CREATE TABLE IF NOT EXISTS forms (
   form TEXT PRIMARY KEY,
+  display TEXT,
   level TEXT
   );
 
