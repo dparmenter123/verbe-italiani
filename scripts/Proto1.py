@@ -12,11 +12,15 @@ class AppSettings:
 
 
 class OneCard:
-    def __init__(self, id, form, verb, pos):
+    def __init__(self):
+        pass
+
+    def load(self, cursor, id):
+        rows = [row for row in cursor.execute('select form, verb, pos, conjugation from cards WHERE ROWID = {ID}'.format(ID=id))]
+
         self.cardid = id
-        self.form = form
-        self.verb = verb
-        self.pos = pos
+        self.form, self.verb, self.pos, self.conjugation = rows[0]
+        return(self)
 
     def display_pos(self):
         pos_map = {
@@ -72,6 +76,25 @@ class OneCard:
                               conjugation1=conjugation.upper(), form2=form2.lower(), prompt=prompt)
         )
 
+    def card_back(self, cursor, level):
+        CARD_BACK = '''
+        +------------------------------------+
+        |
+        |    ({form1})
+        |    
+        |    {conjugation1}
+        |    ---------------------
+        |    ({form2})
+        |    
+        |    {conjugation2}
+        |    
+        +------------------------------------+
+        '''
+        form1, conjugation, form2, _ = self.generate_prompt(cursor, level)
+        return (
+            CARD_BACK.format(level=level, form1=form1.lower(),
+                              conjugation1=conjugation.upper(), form2=form2.lower(), conjugation2=self.conjugation)
+        )
 
 
 
@@ -82,11 +105,13 @@ class OneCard:
 
 def main():
     SETTINGS = AppSettings("B1")
-    card = OneCard(123, "CONGIUNTIVO_PASSATO", 'pensare', 7)
 
     conn = sqlite3.connect(SETTINGS.db)
     c = conn.cursor()
+
+    card = OneCard().load(c, 1000)
     print(card.card_front(c, SETTINGS.level))
+    print(card.card_back(c, SETTINGS.level))
 
 if __name__ == '__main__':
     main()
