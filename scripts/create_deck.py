@@ -24,6 +24,7 @@ def one_form(c, verbs, form, k, start, end, level):
     for verb in verbs[start:end]:
         pos = pick_pos(k)
         q = QUERY.format(verb=verb, form=form, pos=','.join(pos), level2=level)
+        print(q)
         for row in c.execute(q):
             cards += [row]
     return(cards)
@@ -36,6 +37,7 @@ def main():
     QUERY = '''
       select a.verb from appdb a
       ORDER BY a.freq DESC
+      LIMIT 75
     '''
     verbs = [row[0] for row in c.execute(QUERY)]
     c = conn.cursor()
@@ -45,8 +47,6 @@ def main():
     cards += one_form(c, verbs, 'INDICATIVO_PASSATO_PROSSIMO', 1, 51, 250, "A2")
     # cards += one_form(c, verbs, 'INDICATIVO_PASSATO_PROSSIMO', 1, 251, 500, "B1")
     # cards += one_form(c, verbs, 'INDICATIVO_PASSATO_PROSSIMO', 1, 501, 1000, "B2")
-    for card in cards:
-        print(card)
 
     # cards += one_form(c, verbs, 'INDICATIVO_FUTURO_SEMPLICE', 1, 0, 250, "A2")
     # cards += one_form(c, verbs, 'INDICATIVO_FUTURO_SEMPLICE', 1, 251, 500, "B1")

@@ -153,7 +153,7 @@ def main():
     conn = sqlite3.connect(SETTINGS.db)
     cursor = conn.cursor()
 
-    cards = [OneCard().load(cursor, id) for id in random.sample(range(20000), 10)]
+    cards = [OneCard().load(cursor, id) for id in random.sample(range(8400), 10)]
     for card in sorted(cards):
         print(card.form, card.conjugation, card.key)
     return
