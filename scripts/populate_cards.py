@@ -57,7 +57,7 @@ def read_appdb():
 
     return(verbs)
 
-def write_appdb(conjugations):
+def write_cards_to_db(conjugations):
     conn = sqlite3.connect(DBPATH)
     c = conn.cursor()
 
@@ -163,14 +163,39 @@ def one_verb(verb):
 
     return (cards)
 
-def main():
+def do_cards():
     cards = []
     verbs = read_appdb()
     for verb in verbs:
         cards += one_verb(verb)
-    write_appdb(cards)
+    write_cards_to_db(cards)
 
-#    write_full_csv(output, cards)
+def do_card_deck():
+    conn = sqlite3.connect(DBPATH)
+    cursor = conn.cursor()
+
+    QUERY = '''
+        select c.ROWID, f.level 
+        FROM cards c
+        INNER JOIN forms f
+        ON c.form = f.form
+        
+    '''
+    rows = cursor.execute(QUERY)
+    deck = [[row[0], row[1], 0, 2.5, 1, 0] for row in  cursor.execute(QUERY)]
+
+
+    Q2 = '''
+        INSERT INTO carddeck values (?,?,?,?,?,?)
+    '''
+    for card in deck:
+        cursor.execute(Q2, card)
+    conn.commit()
+
+
+def main():
+#    do_cards()
+    do_card_deck()
 
 if __name__ == '__main__':
     main()
