@@ -1,6 +1,7 @@
 import sqlite3
 import cmd
 import queue
+import random
 
 from forms import MATCHING_FORMS
 
@@ -15,14 +16,23 @@ class AppSettings:
 
 
 class OneCard:
+    def __lt__(self, other):
+        return(self.key < other.key)
+
     def __init__(self):
         pass
 
     def load(self, cursor, id):
-        rows = [row for row in cursor.execute('select form, verb, pos, conjugation from cards WHERE ROWID = {ID}'.format(ID=id))]
+        QUERY = '''
+            SELECT c.form, c.verb, c.pos, c.conjugation, f.key FROM cards c 
+            INNER JOIN forms f
+            ON c.form = f.form 
+            WHERE c.ROWID = {ID}
+        '''
+        rows = [row for row in cursor.execute(QUERY.format(ID=id))]
 
         self.cardid = id
-        self.form, self.verb, self.pos, self.conjugation = rows[0]
+        self.form, self.verb, self.pos, self.conjugation, self.key = rows[0]
         return(self)
 
     def display_pos(self):
@@ -71,6 +81,7 @@ class OneCard:
         |    
         |    {prompt} _________?
         |    
+        |    [ ] 
         +------------------------------------+
         '''
         form1, conjugation, form2, prompt = self.generate_prompt(cursor, level)
@@ -90,7 +101,8 @@ class OneCard:
         |    ({form2})
         |    
         |    {conjugation2}
-        |    
+        |
+        |    [x] [ ] [3] [4] [5]
         +------------------------------------+
         '''
         form1, conjugation, form2, _ = self.generate_prompt(cursor, level)
@@ -99,7 +111,7 @@ class OneCard:
                               conjugation1=conjugation.upper(), form2=form2.lower(), conjugation2=self.conjugation)
         )
 
-def StudySession:
+class StudySession:
     def __init__(self, cards):
         self.review = queue.SimpleQueue()
         self.redo = set()
@@ -110,6 +122,9 @@ class Proto1App(cmd.Cmd):
         self.cursor = cursor
         self.level = level
         self.card = 1001
+
+    def do_start(self, line):
+        pass
 
     def do_front(self, line):
         card = OneCard().load(self.cursor, self.card)
@@ -132,10 +147,17 @@ class Proto1App(cmd.Cmd):
 
 
 def main():
+
     SETTINGS = AppSettings("B1")
 
     conn = sqlite3.connect(SETTINGS.db)
     cursor = conn.cursor()
+
+    cards = [OneCard().load(cursor, id) for id in random.sample(range(20000), 10)]
+    for card in sorted(cards):
+        print(card.form, card.conjugation, card.key)
+    return
+
 
     app = Proto1App(cursor, SETTINGS.level)
     app.cmdloop()

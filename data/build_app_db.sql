@@ -3,27 +3,27 @@ DROP TABLE IF EXISTS forms;
 CREATE TABLE IF NOT EXISTS forms (
   form TEXT PRIMARY KEY,
   display TEXT,
-  level TEXT
+  level TEXT,
+  key INTEGER
   );
 
-INSERT into forms values ('INDICATIVO_PRESENTE', 'A0');
-INSERT into forms values ('INDICATIVO_PASSATO_PROSSIMO', 'A1');
+INSERT into forms values ('INDICATIVO_PRESENTE', 'Indicativo: Presente', 'A0', 0);
+INSERT into forms values ('INDICATIVO_PASSATO_PROSSIMO', 'Indicativo: Passato Prossimo', 'A1', 1);
 
-INSERT into forms values ('INDICATIVO_FUTURO_SEMPLICE', 'A2');
-INSERT into forms values ('INDICATIVO_IMPERFETTO', 'A2');
-INSERT into forms values ('CONDIZIONALE_PRESENTE', 'A2');
-INSERT into forms values ('CONGIUNTIVO_PRESENTE', 'A2');
+INSERT into forms values ('INDICATIVO_IMPERFETTO', 'Indicativo: Imperfetto', 'A2', 2);
+INSERT into forms values ('INDICATIVO_FUTURO_SEMPLICE', 'Indicativo: Futuro Semplice', 'A2', 3);
+INSERT into forms values ('CONDIZIONALE_PRESENTE', 'Condizionale: Presente', 'A2', 4);
+INSERT into forms values ('CONGIUNTIVO_PRESENTE', 'Congiuntivo: Presente', 'A2', 5);
 
-INSERT into forms values ('INDICATIVO_TRAPASSATO_PROSSIMO', 'B1');
-INSERT into forms values ('CONGIUNTIVO_IMPERFETTO', 'B1');
-INSERT into forms values ('CONGIUNTIVO_PASSATO', 'B1');
-INSERT into forms values ('CONGIUNTIVO_TRAPASSATO', 'B1');
-INSERT into forms values ('CONDIZIONALE_PASSATO', 'B1');
+INSERT into forms values ('CONGIUNTIVO_IMPERFETTO', 'Congiuntivo: Imperfetto', 'B1', 6);
+INSERT into forms values ('INDICATIVO_TRAPASSATO_PROSSIMO', 'Indicativo: Trapassato Prossimo', 'B1', 8);
+INSERT into forms values ('CONGIUNTIVO_PASSATO', 'Congiuntivo: Passato', 'B1', 9);
+INSERT into forms values ('CONGIUNTIVO_TRAPASSATO', 'Congiuntivo: Trapassato', 'B1', 10);
+INSERT into forms values ('CONDIZIONALE_PASSATO', 'Condizionale: Passato', 'B1', 11);
 
-INSERT into forms values ('INDICATIVO_PASSATO_REMOTO', 'B2');
-INSERT into forms values ('INDICATIVO_TRAPASSATO_REMOTO', 'B2');
-INSERT into forms values ('INDICATIVO_FUTURO_ANTERIORE', 'B2');
-
+INSERT into forms values ('INDICATIVO_PASSATO_REMOTO', 'Indicativo: Passato Remoto', 'B2', 7);
+INSERT into forms values ('INDICATIVO_TRAPASSATO_REMOTO', 'Indicativo: Traassato Remoto', 'B2', 12);
+INSERT into forms values ('INDICATIVO_FUTURO_ANTERIORE', 'Indicativo: Futuro Anteriore', 'B2', 13);
 
 DROP TABLE IF EXISTS freq;
 CREATE TABLE IF NOT EXISTS freq (
