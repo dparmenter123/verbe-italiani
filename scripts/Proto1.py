@@ -1,4 +1,7 @@
 import sqlite3
+import cmd
+import queue
+
 from forms import MATCHING_FORMS
 
 ###########################
@@ -96,22 +99,52 @@ class OneCard:
                               conjugation1=conjugation.upper(), form2=form2.lower(), conjugation2=self.conjugation)
         )
 
+def StudySession:
+    def __init__(self, cards):
+        self.review = queue.SimpleQueue()
+        self.redo = set()
+
+class Proto1App(cmd.Cmd):
+    def __init__(self, cursor, level):
+        super(Proto1App, self).__init__()
+        self.cursor = cursor
+        self.level = level
+        self.card = 1001
+
+    def do_front(self, line):
+        card = OneCard().load(self.cursor, self.card)
+        print(card.card_front(self.cursor, self.level))
+
+    def do_back(self, line):
+        card = OneCard().load(self.cursor, self.card)
+        print(card.card_back(self.cursor, self.level))
+
+    def do_5(self, line):
+        self.card += 1
+        self.do_front(line)
+
+    def emptyline(self, line):
+        pass
 
 
+    def do_EOF(self, line):
+        return True
 
-###########################
-#
-###########################
 
 def main():
     SETTINGS = AppSettings("B1")
 
     conn = sqlite3.connect(SETTINGS.db)
-    c = conn.cursor()
+    cursor = conn.cursor()
 
-    card = OneCard().load(c, 1000)
-    print(card.card_front(c, SETTINGS.level))
-    print(card.card_back(c, SETTINGS.level))
+    app = Proto1App(cursor, SETTINGS.level)
+    app.cmdloop()
+
+    # card = OneCard().load(c, 1000)
+    # print(card.card_front(c, SETTINGS.level))
+    # print(card.card_back(c, SETTINGS.level))
+
+
 
 if __name__ == '__main__':
     main()
