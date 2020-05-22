@@ -5,6 +5,20 @@ import random
 
 from forms import MATCHING_FORMS
 
+QUERY_A1 = '''
+    select d.ROWID, c.form, c.verb, c.pos, c.conjugation, f.key from carddeck d 
+    INNER JOIN cards c 
+    ON d.ROWID = c.ROWID 
+    INNER JOIN forms f
+    ON f.form = c.form
+    INNER JOIN appdb a
+    ON a.verb = c.verb
+    WHERE f.level IN ('A1', 'A2')
+    ORDER BY f.key, RANDOM()
+    LIMIT 250
+ '''
+
+
 ###########################
 #
 ###########################
@@ -19,21 +33,13 @@ class OneCard:
     def __lt__(self, other):
         return(self.key < other.key)
 
-    def __init__(self):
-        pass
-
-    def load(self, cursor, id):
-        QUERY = '''
-            SELECT c.form, c.verb, c.pos, c.conjugation, f.key FROM cards c 
-            INNER JOIN forms f
-            ON c.form = f.form 
-            WHERE c.ROWID = {ID}
-        '''
-        rows = [row for row in cursor.execute(QUERY.format(ID=id))]
-
-        self.cardid = id
-        self.form, self.verb, self.pos, self.conjugation, self.key = rows[0]
-        return(self)
+    def __init__(self, rowid, form, verb, pos, conjugation, key):
+        self.rowid = rowid
+        self.form = form
+        self.verb = verb
+        self.pos = pos
+        self.conjugation = conjugation
+        self.key = key
 
     def display_pos(self):
         pos_map = {
@@ -81,7 +87,7 @@ class OneCard:
         |    
         |    {prompt} _________?
         |    
-        |    [ ] 
+        |    [space] 
         +------------------------------------+
         '''
         form1, conjugation, form2, prompt = self.generate_prompt(cursor, level)
@@ -111,28 +117,34 @@ class OneCard:
                               conjugation1=conjugation.upper(), form2=form2.lower(), conjugation2=self.conjugation)
         )
 
-class StudySession:
-    def __init__(self, cards):
-        self.review = queue.SimpleQueue()
-        self.redo = set()
 
-class Proto1App(cmd.Cmd):
+class FlashVerbItaliano(cmd.Cmd):
+
     def __init__(self, cursor, level):
-        super(Proto1App, self).__init__()
+        super(FlashVerbItaliano, self).__init__()
         self.cursor = cursor
         self.level = level
-        self.card = 1001
+        self.todo = queue.SimpleQueue()
+        self.redo = queue.SimpleQueue()
+        self.card = None
+
+    def load_cards(self):
+        if self.level == 'A1':
+            q = QUERY_A1
+        rows = [row for row in self.cursor.execute(q)]
+        for row in rows:
+            self.todo.put(OneCard(*row))
+        return(self)
 
     def do_start(self, line):
-        pass
+        self.card = self.todo.get()
+        self.do_front(line)
 
     def do_front(self, line):
-        card = OneCard().load(self.cursor, self.card)
-        print(card.card_front(self.cursor, self.level))
+        print(self.card.card_front(self.cursor, self.level))
 
     def do_back(self, line):
-        card = OneCard().load(self.cursor, self.card)
-        print(card.card_back(self.cursor, self.level))
+        print(self.card.card_back(self.cursor, self.level))
 
     def do_5(self, line):
         self.card += 1
@@ -148,24 +160,14 @@ class Proto1App(cmd.Cmd):
 
 def main():
 
-    SETTINGS = AppSettings("B1")
+    SETTINGS = AppSettings("A1")
+    TODAY = 1
 
     conn = sqlite3.connect(SETTINGS.db)
     cursor = conn.cursor()
 
-    cards = [OneCard().load(cursor, id) for id in random.sample(range(8400), 10)]
-    for card in sorted(cards):
-        print(card.form, card.conjugation, card.key)
-    return
-
-
-    app = Proto1App(cursor, SETTINGS.level)
+    app = FlashVerbItaliano(cursor, SETTINGS.level).load_cards()
     app.cmdloop()
-
-    # card = OneCard().load(c, 1000)
-    # print(card.card_front(c, SETTINGS.level))
-    # print(card.card_back(c, SETTINGS.level))
-
 
 
 if __name__ == '__main__':

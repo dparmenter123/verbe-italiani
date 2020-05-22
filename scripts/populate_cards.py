@@ -52,7 +52,7 @@ def read_appdb():
     conn = sqlite3.connect(DBPATH)
     c = conn.cursor()
 
-    verbs = [row[0] for row in c.execute('SELECT verb FROM appdb ORDER BY freq DESC LIMIT 75')]
+    verbs = [row[0] for row in c.execute('SELECT verb FROM appdb ORDER BY freq DESC LIMIT 1000')]
 #    verbs = [row[0] for row in c.execute('SELECT verb FROM appdb')]
 
     return(verbs)
@@ -195,8 +195,8 @@ def do_card_deck():
 
 
 def main():
-#    do_cards()
-    do_card_deck()
+    do_cards()
+#    do_card_deck()
 
 if __name__ == '__main__':
     main()
