@@ -52,7 +52,7 @@ def read_appdb():
     conn = sqlite3.connect(DBPATH)
     c = conn.cursor()
 
-    verbs = [row[0] for row in c.execute('SELECT verb FROM appdb ORDER BY freq DESC LIMIT 1000')]
+    verbs = [row[0] for row in c.execute('SELECT verb FROM appdb ORDER BY freq DESC LIMIT 500')]
 #    verbs = [row[0] for row in c.execute('SELECT verb FROM appdb')]
 
     return(verbs)
