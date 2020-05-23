@@ -1,20 +1,28 @@
 from statemachine import StateMachine, State
 import queue
 
-deck = [
-    ('section 1', 'card 1'),
-    ('section 1', 'card 2'),
-    ('section 2', 'card 3'),
-    ('section 3', 'card 4'),
-    ('section 4', 'card 5'),
-    ('section 4', 'card 6'),
-    ('section 4', 'card 7'),
+class Card:
+    def __init__(self, section, id, repetitions=0, interval=1, easiness=2.5):
+        self.section = section
+        self.id = id
+        self.repetitions = repetitions
+        self.interval = interval
+        self.easiness = easiness
+
+CARD_DECK = [
+    Card('section 1', 1),
+    Card('section 1', 2),
+    Card('section 2', 3),
+    Card('section 3', 4),
+    Card('section 4', 5),
+    Card('section 4', 6),
+    Card('section 4', 7),
 ]
 
 class AppStateMachine(StateMachine):
     initialize = State('initialize', initial=True)
     build = State('build')
-    done = State('done')
+    doneview = State('done view')
     homeview = State('home view')
     settingsview = State('settings view')
     any_to_study_p = State('any to study?')
@@ -23,7 +31,7 @@ class AppStateMachine(StateMachine):
     backview = State('back view')
     correct = State('correct')
     wrong = State('wrong')
-    more_todo_p = State('more todo?')
+    more_todo_p = State('more to do?')
     any_to_redo_p = State('any to redo?')
     new_section_p = State('new section?')
     
@@ -37,7 +45,7 @@ class AppStateMachine(StateMachine):
     settings_to_build = settingsview.to(build)
 
     any_to_study_yes = any_to_study_p.to(sectionview)
-    any_to_study_no = any_to_study_p.to(done)
+    any_to_study_no = any_to_study_p.to(doneview)
 
     sectionview_to_homeview = sectionview.to(homeview)
     sectionview_to_frontview = sectionview.to(frontview)
@@ -57,25 +65,47 @@ class AppStateMachine(StateMachine):
     more_todo_no = more_todo_p.to(any_to_redo_p)
 
     any_to_redo_yes = any_to_redo_p.to(new_section_p)
-    any_to_redo_no = any_to_redo_p.to(done)
+    any_to_redo_no = any_to_redo_p.to(doneview)
+
+    def __init__(self):
+        super(AppStateMachine, self).__init__(self)
+        self.todo = queue.SimpleQueue()
+        self.redo = queue.LifoQueue()
+        self.sections = []
 
     def on_enter_done(self):
         print('done')
 
     def on_enter_initialize(self):
         print('initialize', initial=True)
+        self.initialize_to_build()
 
     def on_enter_build(self):
-        print('build')
+        print('entering build')
+        for card in CARD_DECK:
+            if card.section not in self.sections: self.sections += [card.section]
+            self.todo.put((card))
+        self.current_card = self.todo.get()
+        self.build_to_home_view()
 
     def on_enter_homeview(self):
-        print('home view')
+        print('entering home')
+        view = '''
+        +----------------
+        | HOME
+        |
+        | * settings?
+        | * study
+        +----------------
+        '''
+        print(view)
+        self.homeview_to_any_to_study()
 
     def on_enter_settingsview(self):
         print('settings view')
 
     def on_enter_any_to_study_p(self):
-        print('any to study?')
+        print('entering any to study?')
 
     def on_enter_sectionview(self):
         print('section view')
@@ -101,30 +131,7 @@ class AppStateMachine(StateMachine):
     def on_enter_new_section_p(self):
         print('new section?')
 
-    def __init__(self):
-        super(AppStateMachine, self).__init__(self)
-        self.todo = queue.SimpleQueue()
-        self.redo = queue.LifoQueue()
-        self.sections = []
-        for section, card in deck:
-            if section not in self.sections: self.sections += [section]
-            self.todo.put((section, card))
-        self.current_card = self.todo.get()
 
-    # done = State('done')
-    # initialize = State('initialize', initial=True)
-    # build = State('build')
-    # homeview = State('home view')
-    # settingsview = State('settings view')
-    # any_to_study_p = State('any to study?')
-    # sectionview = State('section view')
-    # frontview = State('front view')
-    # backview = State('back view')
-    # correct = State('correct')
-    # wrong = State('wrong')
-    # more_todo_p = State('more todo?')
-    # any_to_redo_p = State('any to redo?')
-    # new_section_p = State('new section?')
 
     # def on_enter_home(self):
     #     prompt = '''
@@ -188,6 +195,7 @@ class AppStateMachine(StateMachine):
 
 def main():
     app = AppStateMachine()
+    app.initialize_to_build()
 
 if __name__ == '__main__':
     main()
