@@ -1,13 +1,15 @@
 from statemachine import StateMachine, State
 import queue
 
+TODAY = 0
 class Card:
-    def __init__(self, section, id, repetitions=0, interval=1, easiness=2.5):
+    def __init__(self, section, id, repetitions=0, interval=1, easiness=2.5, next_practice=0):
         self.section = section
         self.id = id
         self.repetitions = repetitions
         self.interval = interval
         self.easiness = easiness
+        self.next_practice = next_practice
 
 CARD_DECK = [
     Card('section 1', 1),
@@ -72,6 +74,7 @@ class AppStateMachine(StateMachine):
         self.todo = queue.SimpleQueue()
         self.redo = queue.LifoQueue()
         self.sections = []
+        self.current_card = None
 
     def on_enter_done(self):
         print('done')
@@ -83,9 +86,11 @@ class AppStateMachine(StateMachine):
     def on_enter_build(self):
         print('entering build')
         for card in CARD_DECK:
-            if card.section not in self.sections: self.sections += [card.section]
-            self.todo.put((card))
-        self.current_card = self.todo.get()
+            if card.next_practice <= TODAY:
+                if card.section not in self.sections: self.sections += [card.section]
+                self.todo.put((card))
+        if self.todo.qsize() > 0:
+            self.current_card = self.todo.get()
         self.build_to_home_view()
 
     def on_enter_homeview(self):
@@ -106,6 +111,8 @@ class AppStateMachine(StateMachine):
 
     def on_enter_any_to_study_p(self):
         print('entering any to study?')
+        if self.current_card:
+            print('yes')
 
     def on_enter_sectionview(self):
         print('section view')

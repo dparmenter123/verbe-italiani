@@ -5,7 +5,7 @@ import random
 
 from forms import MATCHING_FORMS
 
-QUERY_A1 = '''
+QUERY = '''
     select d.ROWID, c.form, c.verb, c.pos, c.conjugation, f.key from carddeck d 
     INNER JOIN cards c 
     ON d.ROWID = c.ROWID 
@@ -13,9 +13,9 @@ QUERY_A1 = '''
     ON f.form = c.form
     INNER JOIN appdb a
     ON a.verb = c.verb
-    WHERE f.level IN ('A1', 'A2')
+    WHERE f.level IN ({levels})
     ORDER BY f.key, RANDOM()
-    LIMIT 250
+    LIMIT {limit}
  '''
 
 
@@ -27,6 +27,7 @@ class AppSettings:
     def __init__(self, level):
         self.level = level
         self.db = '/Users/davidp/work/verbe-italiani/data/db/app.db'
+        self.today = 1
 
 
 class OneCard:
@@ -130,7 +131,9 @@ class FlashVerbItaliano(cmd.Cmd):
 
     def load_cards(self):
         if self.level == 'A1':
-            q = QUERY_A1
+            levels = "'A1'"
+            limit = 25
+        q = QUERY.format(limit=limit, levels=levels)
         rows = [row for row in self.cursor.execute(q)]
         for row in rows:
             self.todo.put(OneCard(*row))
@@ -161,7 +164,6 @@ class FlashVerbItaliano(cmd.Cmd):
 def main():
 
     SETTINGS = AppSettings("A1")
-    TODAY = 1
 
     conn = sqlite3.connect(SETTINGS.db)
     cursor = conn.cursor()
