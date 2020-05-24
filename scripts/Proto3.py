@@ -147,6 +147,7 @@ class Proto3Model(object):
          +----------
          '''
         print(view.format(card=self.card))
+        if card.id % 2 == 0 or
         if random.random() < 0.33:
             self.correct()
         else:
