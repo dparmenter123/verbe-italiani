@@ -3,20 +3,16 @@ import queue
 from transitions import Machine
 import random
 
-TODAY = 1
-random.seed(125)
-
 class Card:
-    def __init__(self, section, id, time, repetitions=0, interval=1, easiness=2.5, next_practice=0):
+    def __init__(self, section, id, day, repetitions=0, interval=1, easiness=2.5, next_practice=0):
         self.section = section
         self.id = id
-        self.time = time
         self.repetitions = repetitions
         self.interval = interval
         self.easiness = easiness
         self.next_practice = next_practice
 
-    def update(self, quality, time):
+    def update(self, quality, day):
         # SM-2
         assert quality >= 0 and quality <= 5
         self.easiness = max(1.3, self.easiness + 0.1 - (5.0 - quality) * (0.08 + (5.0 - quality) * 0.02))
@@ -24,18 +20,18 @@ class Card:
             self.repetitions = 0
         else:
             self.repetitions += 1
-        if self.repetitions == 1:
+        if self.repetitions <= 1:
             self.interval = 1
         elif self.repetitions == 2:
             self.interval = 6
         else:
             self.interval *= self.easiness
-        self.time = time
+        self.next_practice = day + self.interval
 
 
     def __repr__(self):
-        return('{section} / {id}  | [time:{time}] [rep:{repetitions}] [int:{interval}] [ease:{easiness}] [next:{next_practice}]'.format(
-            section=self.section, id = self.id, time=self.time, repetitions=self.repetitions, interval=self.interval,
+        return('{section} / {id}  | [rep:{repetitions}] [int:{interval}] [ease:{easiness}] [next:{next_practice}]'.format(
+            section=self.section, id = self.id, repetitions=self.repetitions, interval=self.interval,
             easiness=self.easiness, next_practice=self.next_practice
         ))
 
@@ -91,25 +87,28 @@ transitions = [
 ]
 
 class Proto3Model(object):
-    def __init__(self):
+    def __init__(self, today):
+        self.debug_mode = False
+        self.today = today
+
         self.todo = queue.SimpleQueue()
         self.redo = queue.SimpleQueue()
         self.done = queue.LifoQueue()
 
-        for card in CARD_DECK:
-            self.todo.put(card)
 
-        assert self.todo.qsize() > 0
-        self.card = self.todo.get()
-        self.section = self.card.section
+    def debug(self, p):
+        if not self.debug_mode: return
+        print(p)
 
     def dump_state(self):
+        if not self.debug_mode: return
         state = '''
         ============
           TODO: {todo}
           REDO: {redo}
           DONE: {done}
-          CURRENT: {section} / {card}
+          SECTION: {section}
+          CARD: {card}
        ============ 
         '''
         print(state.format(
@@ -117,11 +116,22 @@ class Proto3Model(object):
             section=self.section, card=self.card))
 
     def on_enter_BUILD(self):
-        print('building')
+        self.debug('building')
+
+        for card in CARD_DECK:
+            if self.today >= card.next_practice:
+                self.todo.put(card)
+
+        if self.todo.qsize() > 0:
+            self.card = self.todo.get()
+            self.section = self.card.section
+        else:
+            self.card = None
+            self.section = None
+
         self.homeview()
 
     def on_enter_HOME_VIEW(self):
-        print('homeview...')
         view = '''
         +-------------
         | HOME
@@ -130,23 +140,23 @@ class Proto3Model(object):
         | * settings
         +-------------
         '''
-        print(view)
+        self.debug(view)
         self.dump_state()
 
     def on_enter_ANY_TO_STUDY(self):
-        print('ANY TO STUDY?')
+        self.debug('ANY TO STUDY?')
         if self.todo.qsize() > 0 or self.card:
-            print('  yes')
+            self.debug('  yes')
             self.any_to_study_yes()
         else:
-            print('  no')
+            self.debug('  no')
             self.any_to_study_no()
 
     def on_enter_DONE(self):
-        print('DONE!')
+        self.debug('DONE!')
         while self.done.qsize() > 0:
             card = self.done.get()
-            print(card)
+            self.debug(card)
 
 
     def on_enter_SECTION_VIEW(self):
@@ -160,7 +170,7 @@ class Proto3Model(object):
         |  * home
         +----------
         '''
-        print(view.format(section=self.card.section))
+        self.debug(view.format(section=self.card.section))
         self.front()
 
     def on_enter_FRONT_VIEW(self):
@@ -174,7 +184,7 @@ class Proto3Model(object):
          |  * home
          +----------
          '''
-        print(view.format(card=self.card))
+        self.debug(view.format(card=self.card))
         self.flip()
 
     def on_enter_BACK_VIEW(self):
@@ -188,45 +198,45 @@ class Proto3Model(object):
          |  * wrong
          +----------
          '''
-        print(view.format(card=self.card))
+        self.debug(view.format(card=self.card))
         if self.card.id % 2 == 0 or random.random() < 0.33:
             self.correct()
         else:
             self.wrong()
 
     def on_enter_CORRECT(self):
-        print('CORRECT!')
-        self.card.update(3, TODAY)
+        self.debug('CORRECT!')
+        self.card.update(3, self.today)
         self.done.put(self.card)
         self.card = None
         self.correct2()
 
     def on_enter_WRONG(self):
-        print('WRONG!')
-        self.card.update(0, TODAY)
+        self.debug('WRONG!')
+        self.card.update(0, self.today)
         self.redo.put(self.card)
         self.card = None
         self.wrong2()
 
     def on_enter_MORE_TODO(self):
-        print('MORE TO DO?')
+        self.debug('MORE TO DO?')
         if self.todo.qsize() > 0:
-            print('  yes')
+            self.debug('  yes')
             self.card = self.todo.get()
             self.dump_state()
             self.more_todo_yes()
         else:
-            print('  no')
+            self.debug('  no')
             self.dump_state()
             self.more_todo_no()
 
     def on_enter_ANY_TO_REDO(self):
         assert self.todo.qsize() == 0
         assert not self.card
-        print('ANY TO REDO?')
+        self.debug('ANY TO REDO?')
 
         if self.redo.qsize() > 0:
-            print('  yes')
+            self.debug('  yes')
             while self.redo.qsize() > 0:
                 card = self.redo.get()
                 self.todo.put(card)
@@ -235,29 +245,36 @@ class Proto3Model(object):
             self.section = None
             self.any_to_redo_yes()
         else:
-            print('  no')
+            self.debug('  no')
             self.dump_state()
             self.any_to_redo_no()
 
     def on_enter_NEW_SECTION(self):
-        print('NEW SECTION?')
+        self.debug('NEW SECTION?')
         self.dump_state()
         if self.section != self.card.section:
-            print('  yes')
+            self.debug('  yes')
             self.new_section_yes()
         else:
-            print('  no')
+            self.debug('  no')
             self.new_section_no()
 
 
 def main():
-    model = Proto3Model()
-    machine = Machine(model, states=States, transitions=transitions, initial=States.START, queued=True)
-    model.build()
-    model.study()
-    while(model.state != States.DONE):
-        model.front()
+    TODAY = 1
+    random.seed(125)
 
+    while (TODAY < 25):
+        print('====================={today}=================='.format(today=TODAY))
+        model = Proto3Model(TODAY)
+        machine = Machine(model, states=States, transitions=transitions, initial=States.START, queued=True)
+        model.build()
+        model.study()
+        while(model.state != States.DONE):
+            model.front()
+        TODAY += 1
+        for card in CARD_DECK:
+            print(card)
 
 if __name__ == '__main__':
     main()
