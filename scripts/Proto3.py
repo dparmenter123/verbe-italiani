@@ -95,6 +95,10 @@ class Proto3Model(object):
         self.redo = queue.SimpleQueue()
         self.done = queue.LifoQueue()
 
+        self.statistics = {
+            'correct': set(),
+            'wrong': set()
+        }
 
     def debug(self, p):
         if not self.debug_mode: return
@@ -199,13 +203,15 @@ class Proto3Model(object):
          +----------
          '''
         self.debug(view.format(card=self.card))
-        if self.card.id % 2 == 0 or random.random() < 0.33:
+        if self.card.id % 4 == 0 or random.random() < 0.33:
             self.correct()
         else:
             self.wrong()
 
     def on_enter_CORRECT(self):
         self.debug('CORRECT!')
+        self.statistics['correct'] |= set([self.card.id])
+
         self.card.update(3, self.today)
         self.done.put(self.card)
         self.card = None
@@ -213,6 +219,8 @@ class Proto3Model(object):
 
     def on_enter_WRONG(self):
         self.debug('WRONG!')
+        self.statistics['wrong'] |= set([self.card.id])
+
         self.card.update(0, self.today)
         self.redo.put(self.card)
         self.card = None
@@ -273,6 +281,11 @@ def main():
         while(model.state != States.DONE):
             model.front()
         TODAY += 1
+        correct = len(model.statistics['correct'] - model.statistics['wrong'])
+        wrong = len(model.statistics['wrong'])
+        print('correct: %d' % correct)
+        print('wrong: %d' % wrong)
+
         for card in CARD_DECK:
             print(card)
 
