@@ -4,6 +4,7 @@ from transitions import Machine
 import random
 
 TODAY = 1
+random.seed(125)
 
 class Card:
     def __init__(self, section, id, time, repetitions=0, interval=1, easiness=2.5, next_practice=0):
@@ -49,6 +50,45 @@ CARD_DECK = [
     Card('DDD', 7, 0),
 ]
 
+# The states
+class States(enum.Enum):
+    ERROR = 0
+    START = 1
+    BUILD = 2
+    HOME_VIEW = 3
+    ANY_TO_STUDY = 4
+    SECTION_VIEW = 5
+    FRONT_VIEW = 6
+    BACK_VIEW = 7
+    CORRECT = 8
+    WRONG = 9
+    MORE_TODO = 10
+    ANY_TO_REDO = 11
+    NEW_SECTION = 12
+    DONE = 99
+
+transitions = [
+    ['build', States.START, States.BUILD ],
+    ['homeview', States.BUILD, States.HOME_VIEW ],
+    ['study', States.HOME_VIEW, States.ANY_TO_STUDY ],
+    ['any_to_study_no', States.ANY_TO_STUDY, States.DONE ],
+    ['any_to_study_yes', States.ANY_TO_STUDY, States.SECTION_VIEW ],
+    ['front', States.SECTION_VIEW, States.FRONT_VIEW ],
+    ['flip', States.FRONT_VIEW, States.BACK_VIEW ],
+    ['flip_back', States.BACK_VIEW, States.FRONT_VIEW ],
+    ['home1', States.SECTION_VIEW, States.HOME_VIEW],
+    ['home2', States.FRONT_VIEW, States.HOME_VIEW],
+    ['wrong', States.BACK_VIEW, States.WRONG],
+    ['correct', States.BACK_VIEW, States.CORRECT],
+    ['correct2', States.CORRECT, States.MORE_TODO],
+    ['wrong2', States.WRONG, States.MORE_TODO],
+    ['more_todo_yes', States.MORE_TODO, States.NEW_SECTION],
+    ['more_todo_no', States.MORE_TODO, States.ANY_TO_REDO],
+    ['any_to_redo_yes', States.ANY_TO_REDO, States.NEW_SECTION],
+    ['any_to_redo_no', States.ANY_TO_REDO, States.DONE],
+    ['new_section_yes', States.NEW_SECTION, States.SECTION_VIEW],
+    ['new_section_no', States.NEW_SECTION, States.FRONT_VIEW]
+]
 
 class Proto3Model(object):
     def __init__(self):
@@ -94,9 +134,7 @@ class Proto3Model(object):
         self.dump_state()
 
     def on_enter_ANY_TO_STUDY(self):
-        print('any to study?')
-        print('  todo:', self.todo.qsize())
-        print('  card[%s]' %  self.card)
+        print('ANY TO STUDY?')
         if self.todo.qsize() > 0 or self.card:
             print('  yes')
             self.any_to_study_yes()
@@ -105,7 +143,11 @@ class Proto3Model(object):
             self.any_to_study_no()
 
     def on_enter_DONE(self):
-        print('done!')
+        print('DONE!')
+        while self.done.qsize() > 0:
+            card = self.done.get()
+            print(card)
+
 
     def on_enter_SECTION_VIEW(self):
         view = '''
@@ -147,8 +189,7 @@ class Proto3Model(object):
          +----------
          '''
         print(view.format(card=self.card))
-        if card.id % 2 == 0 or
-        if random.random() < 0.33:
+        if self.card.id % 2 == 0 or random.random() < 0.33:
             self.correct()
         else:
             self.wrong()
@@ -168,32 +209,38 @@ class Proto3Model(object):
         self.wrong2()
 
     def on_enter_MORE_TODO(self):
-        print('More to do?')
-        self.dump_state()
+        print('MORE TO DO?')
         if self.todo.qsize() > 0:
             print('  yes')
             self.card = self.todo.get()
+            self.dump_state()
             self.more_todo_yes()
         else:
             print('  no')
+            self.dump_state()
             self.more_todo_no()
 
     def on_enter_ANY_TO_REDO(self):
         assert self.todo.qsize() == 0
         assert not self.card
-        print('Any to redo?')
+        print('ANY TO REDO?')
 
         if self.redo.qsize() > 0:
+            print('  yes')
             while self.redo.qsize() > 0:
                 card = self.redo.get()
                 self.todo.put(card)
             self.card = self.todo.get()
+            self.dump_state()
+            self.section = None
             self.any_to_redo_yes()
         else:
+            print('  no')
+            self.dump_state()
             self.any_to_redo_no()
 
     def on_enter_NEW_SECTION(self):
-        print('new section?')
+        print('NEW SECTION?')
         self.dump_state()
         if self.section != self.card.section:
             print('  yes')
@@ -202,49 +249,10 @@ class Proto3Model(object):
             print('  no')
             self.new_section_no()
 
-# The states
-class States(enum.Enum):
-    ERROR = 0
-    START = 1
-    BUILD = 2
-    HOME_VIEW = 3
-    ANY_TO_STUDY = 4
-    SECTION_VIEW = 5
-    FRONT_VIEW = 6
-    BACK_VIEW = 7
-    CORRECT = 8
-    WRONG = 9
-    MORE_TODO = 10
-    ANY_TO_REDO = 11
-    NEW_SECTION = 12
-    DONE = 99
-
-transitions = [
-    ['build', States.START, States.BUILD ],
-    ['homeview', States.BUILD, States.HOME_VIEW ],
-    ['study', States.HOME_VIEW, States.ANY_TO_STUDY ],
-    ['any_to_study_no', States.ANY_TO_STUDY, States.DONE ],
-    ['any_to_study_yes', States.ANY_TO_STUDY, States.SECTION_VIEW ],
-    ['front', States.SECTION_VIEW, States.FRONT_VIEW ],
-    ['flip', States.FRONT_VIEW, States.BACK_VIEW ],
-    ['flip_back', States.BACK_VIEW, States.FRONT_VIEW ],
-    ['home1', States.SECTION_VIEW, States.HOME_VIEW],
-    ['home2', States.FRONT_VIEW, States.HOME_VIEW],
-    ['wrong', States.BACK_VIEW, States.WRONG],
-    ['correct', States.BACK_VIEW, States.CORRECT],
-    ['correct2', States.CORRECT, States.MORE_TODO],
-    ['wrong2', States.WRONG, States.MORE_TODO],
-    ['more_todo_yes', States.MORE_TODO, States.NEW_SECTION],
-    ['more_todo_no', States.MORE_TODO, States.ANY_TO_REDO],
-    ['any_to_redo_yes', States.ANY_TO_REDO, States.NEW_SECTION],
-    ['any_to_redo_no', States.ANY_TO_REDO, States.DONE],
-    ['new_section_yes', States.NEW_SECTION, States.SECTION_VIEW],
-    ['new_section_no', States.NEW_SECTION, States.FRONT_VIEW]
-]
 
 def main():
     model = Proto3Model()
-    machine = Machine(model, states=States, transitions=transitions, initial=States.START)
+    machine = Machine(model, states=States, transitions=transitions, initial=States.START, queued=True)
     model.build()
     model.study()
     while(model.state != States.DONE):
