@@ -25,22 +25,37 @@ INSERT into forms values ('INDICATIVO_FUTURO_ANTERIORE', 'Indicativo: Futuro Ant
 
 .import lists/reflexive.dat reflexive
 
-create table temp1 AS select verb FROM (select verb from master where verb NOT IN ( select verb from irregular )) ;
+INSERT INTO appdb
+  select m.verb, f.freq, 0 AS 'irregular', 0 AS 'reflexive', "A1" from master m
+  inner join freq f ON f.verb = m.verb
+  ORDER BY f.freq DESC
+  LIMIT 100;
 
-CREATE TABLE IF NOT EXISTS appdb AS
-select *
-FROM (
-    select irregular.verb, 99999999 as freq, 1 AS irregular, 0 AS reflexive from irregular
-  )
-UNION
-select *
-FROM (
-    select temp1.verb, freq.freq AS freq, 0 AS irregular, 0 AS reflexive from temp1 INNER JOIN freq WHERE temp1.verb = freq.verb ORDER BY freq.freq
-  )
-UNION
-select *
-  FROM (
-    select reflexive.reflexive, freq.freq AS freq, 0 AS irregular, 1 AS reflexive from reflexive INNER JOIN freq WHERE reflexive.verb = freq.verb
-  );
+INSERT INTO appdb
+  select m.verb, f.freq, 0 AS 'irregular', 0 AS 'reflexive', "A2" from master m
+  inner join freq f ON f.verb = m.verb
+  ORDER BY f.freq DESC
+  LIMIT 100 OFFSET 100;
 
-DROP TABLE IF EXISTS temp1;
+INSERT INTO appdb
+  select m.verb, f.freq, 0 AS 'irregular', 0 AS 'reflexive', "A2" from master m
+  inner join freq f ON f.verb = m.verb
+  ORDER BY f.freq DESC
+  LIMIT 200 OFFSET 200;
+
+INSERT INTO appdb
+  select m.verb, f.freq, 0 AS 'irregular', 0 AS 'reflexive', "A2" from master m
+  inner join freq f ON f.verb = m.verb
+  ORDER BY f.freq DESC
+  LIMIT 400 OFFSET 400;
+
+  update appdb set irregular=1 WHERE appdb.verb IN (
+  select a.verb from appdb a inner join irregular i on i.verb = a.verb );
+
+insert into appdb
+  select r.reflexive, a.freq, a.irregular, 1, a.level from appdb a
+  inner join reflexive r ON r.verb = a. verb;
+
+UPDATE appdb
+  set level = "A1"
+  where verb = 'bere';

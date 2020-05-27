@@ -78,7 +78,7 @@ def main():
     cards += one_form(c, verbs, 'CONGIUNTIVO_IMPERFETTO', 1, 501, 1000, "B2")
 
     cards += one_form(c, verbs, 'CONGIUNTIVO_PASSATO', 1, 0, 500, "B1")
-    # cards += one_form(c, verbs, 'CONGIUNTIVO_PASSATO', 1, 501, 1000, "B2")
+    cards += one_form(c, verbs, 'CONGIUNTIVO_PASSATO', 1, 501, 1000, "B2")
 
     cards += one_form(c, verbs, 'CONGIUNTIVO_TRAPASSATO', 1, 0, 500, "B1")
     cards += one_form(c, verbs, 'CONGIUNTIVO_TRAPASSATO', 1, 501, 1000, "B2")
