@@ -20,3 +20,18 @@ INNER JOIN appdb a ON a.verb = c.verb
 WHERE c.pos = 0  AND NOT f.simple
 AND a.level = 'A1'
 
+select c.verb, c.pos, c.conjugation, c.form, forms.level AS 'form-level', f.level AS 'verb-level' from conjugations c
+INNER JOIN forms ON forms.form = c.form
+INNER JOIN facts f on f.verb = c.verb
+WHERE f.level IN ('A1')
+AND forms.level in ('A0', 'A1')
+AND f.irregular
+ORDER BY RANDOM()
+
+select * from deck
+--WHERE form_level in ('A0', 'A1') AND verb_level IN ('A1')
+--WHERE form_level in ('A0', 'A1', 'A2') AND verb_level IN ('A1', 'A2')
+--WHERE form_level in ('A0', 'A1', 'A2', 'B1') AND verb_level IN ('A1', 'A2', 'B1')
+ WHERE form_level in ('A0', 'A1', 'A2', 'B1', 'B2') AND verb_level IN ('A1', 'A2', 'B1', 'B2')
+ORDER BY RANDOM()
+;

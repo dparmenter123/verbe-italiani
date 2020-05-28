@@ -25,37 +25,38 @@ INSERT into forms values ('INDICATIVO_FUTURO_ANTERIORE', 'Indicativo: Futuro Ant
 
 .import lists/reflexive.dat reflexive
 
-INSERT INTO appdb
-  select m.verb, f.freq, 0 AS 'irregular', 0 AS 'reflexive', "A1" from master m
-  inner join freq f ON f.verb = m.verb
+INSERT INTO facts
+  SELECT m.verb, f.freq, 0 AS 'irregular', 0 AS 'reflexive', "A1" FROM master m
+  INNER JOIN freq f ON f.verb = m.verb
   ORDER BY f.freq DESC
   LIMIT 100;
 
-INSERT INTO appdb
-  select m.verb, f.freq, 0 AS 'irregular', 0 AS 'reflexive', "A2" from master m
-  inner join freq f ON f.verb = m.verb
+INSERT INTO facts
+  SELECT m.verb, f.freq, 0 AS 'irregular', 0 AS 'reflexive', "A2" FROM master m
+  INNER JOIN freq f ON f.verb = m.verb
   ORDER BY f.freq DESC
   LIMIT 100 OFFSET 100;
 
-INSERT INTO appdb
-  select m.verb, f.freq, 0 AS 'irregular', 0 AS 'reflexive', "B1" from master m
-  inner join freq f ON f.verb = m.verb
+INSERT INTO facts
+  SELECT m.verb, f.freq, 0 AS 'irregular', 0 AS 'reflexive', "B1" FROM master m
+  INNER JOIN freq f ON f.verb = m.verb
   ORDER BY f.freq DESC
   LIMIT 200 OFFSET 200;
 
-INSERT INTO appdb
-  select m.verb, f.freq, 0 AS 'irregular', 0 AS 'reflexive', "B2" from master m
-  inner join freq f ON f.verb = m.verb
+INSERT INTO facts
+  SELECT m.verb, f.freq, 0 AS 'irregular', 0 AS 'reflexive', "B2" FROM master m
+  INNER JOIN freq f ON f.verb = m.verb
   ORDER BY f.freq DESC
   LIMIT 400 OFFSET 400;
 
-  update appdb set irregular=1 WHERE appdb.verb IN (
-  select a.verb from appdb a inner join irregular i on i.verb = a.verb );
+UPDATE facts set irregular=1 WHERE facts.verb IN (
+  SELECT a.verb FROM facts a INNER JOIN irregular i ON i.verb = a.verb
+  );
 
-insert into appdb
-  select r.reflexive, a.freq, a.irregular, 1, a.level from appdb a
+INSERT INTO facts
+  select r.reflexive, a.freq, a.irregular, 1, a.level from facts a
   inner join reflexive r ON r.verb = a. verb;
 
-UPDATE appdb
-  set level = "A1"
-  where verb = 'bere';
+UPDATE facts
+  SET LEVEL = "A1"
+  WHERE verb = 'bere';

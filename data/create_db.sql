@@ -1,6 +1,6 @@
-DROP TABLE iF  EXISTS appdb;
+DROP TABLE iF  EXISTS facts;
 
-CREATE TABLE IF NOT EXISTS appdb (
+CREATE TABLE IF NOT EXISTS facts (
   verb TEXT PRIMARY KEY,
   freq INTEGER,
   irregular INTEGER DEFAULT 0,
@@ -41,8 +41,8 @@ CREATE TABLE IF NOT EXISTS reflexive (
   reflexive TEXT
   );
 
-DROP TABLE IF EXISTS cards;
-CREATE TABLE IF NOT EXISTS cards (
+DROP TABLE IF EXISTS conjugations;
+CREATE TABLE IF NOT EXISTS conjugations (
   verb TEXT,
   pos INTEGER,
   form TEXT,
